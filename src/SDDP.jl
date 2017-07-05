@@ -46,6 +46,8 @@ include("avar_riskaversion.jl")
 include("solve_asyncronous.jl")
 include("visualiser/visualise.jl")
 
+include("cso_writer.jl")
+
 immutable UnsetSolver <: JuMP.MathProgBase.AbstractMathProgSolver end
 """
     SDDPModel(;kwargs...) do ...
