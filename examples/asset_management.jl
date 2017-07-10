@@ -45,5 +45,8 @@ m = SDDPModel(
     end
 end
 
-srand(111)
-@time solve(m, max_iterations = 25)
+SDDP.writecso("asset.cso", m, author = "Oscar Dowson",
+description = "The Asset Management problem taken from Gassmann, H., and Kristjansson, B. (2007). The SMPS Format Explained. IMA Journal of Management Mathematics, 19(4), 347-377.")
+
+# srand(111)
+# @time solve(m, max_iterations = 25)

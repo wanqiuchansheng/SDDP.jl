@@ -1,10 +1,7 @@
-# TODO drop cuts and theta variable
-# TODO drop equality constraint
 # TODO quadratic objective
 # TODO constant in objective
 using CSO
-function writecso(filename::String, m::SDDPModel; kwargs...)
-
+function writecso{T}(filename::String, m::SDDPModel{DefaultValueFunction{T}}; kwargs...)
     model = CSO.CSOProblem{CSO.LinearSubproblemRealisation}(
         CSO.CSOSubproblem{CSO.LinearSubproblemRealisation}[],
         nstates(getsubproblem(m, 1, 1))
@@ -54,18 +51,34 @@ function construct_realisation(sp)
         c[var.col] += coef
     end
     ex = ext(sp)
-    s_in = [s.variable.col for s in ex.states]
-    s_out = [sp.linconstr[s.constraint.idx].terms.vars[1].col for s in ex.states]
+    @show JuMP.MathProgBase.numvar(sp)
+    theta_idx = ex.valueoracle.theta.col
+    good_cols = vcat(1:(theta_idx-1), (theta_idx+1):length(c))
+
+    s_out = [colnames[s.variable.col] for s in ex.states]
+    s_in = [colnames[sp.linconstr[s.constraint.idx].terms.vars[1].col] for s in ex.states]
+
+    bad_rows = [s.constraint.idx for s in ex.states]
+    for (i, con) in enumerate(sp.linconstr)
+        for v in con.terms.vars
+            if v.col == theta_idx
+                push!(bad_rows, i)
+                continue
+            end
+        end
+    end
+    good_rows = [i for i in 1:JuMP.MathProgBase.numconstr(sp) if !(i in bad_rows)]
+    # TODO state columns now out of wack
     CSO.LinearSubproblemRealisation(
-        JuMP.MathProgBase.getconstrmatrix(internalmodel(sp)),
-        sp.colLower,
-        sp.colUpper,
-        c,
-        constraint_bounds[1],
-        constraint_bounds[2],
+        JuMP.MathProgBase.getconstrmatrix(internalmodel(sp))[good_rows, good_cols],
+        sp.colLower[good_cols],
+        sp.colUpper[good_cols],
+        c[good_cols],
+        constraint_bounds[1][good_rows],
+        constraint_bounds[2][good_rows],
         JuMP.getobjectivesense(sp),
-        sp.colCat,
-        colnames,
+        sp.colCat[good_cols],
+        colnames[good_cols],
         s_in,
         s_out
     )
