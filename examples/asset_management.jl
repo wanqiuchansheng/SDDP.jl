@@ -7,11 +7,13 @@
 #==
 The Asset Management problem taken from
 
-    Gassmann, H., and Kristjansson, B. (2007). The SMPS Format Explained. IMA
-    Journal of Management Mathematics, 19(4), 347-377.",
+    J. R. Birge,  F. Louveaux,  Introduction to Stochastic Programming,
+    Springer Series in Operations Research and Financial Engineering,
+    Springer New York, New York, NY, 2
 ==#
 
 using SDDP, JuMP, Clp
+using Base.Test
 
 rstock = [1.25, 1.06]
 rbonds = [1.14, 1.12]
@@ -45,8 +47,7 @@ m = SDDPModel(
     end
 end
 
-SDDP.writecso("asset.cso", m, author = "Oscar Dowson",
-description = "The Asset Management problem taken from Gassmann, H., and Kristjansson, B. (2007). The SMPS Format Explained. IMA Journal of Management Mathematics, 19(4), 347-377.")
-
 # srand(111)
-# @time solve(m, max_iterations = 25)
+@time solve(m, max_iterations = 25)
+@test isapprox(getbound(m), 1.514, atol=1e-4)
+@show getbound(m)

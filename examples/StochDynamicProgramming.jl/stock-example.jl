@@ -41,6 +41,6 @@ end
 
 @time status = SDDP.solve(m, max_iterations = 50)
 @test isapprox(SDDP.getbound(m), -1.471, atol=0.001)
-
+@show SDDP.getbound(m)
 results = simulate(m, 1000)
 @test isapprox(mean(r[:objective] for r in results), -1.471, atol=0.05)

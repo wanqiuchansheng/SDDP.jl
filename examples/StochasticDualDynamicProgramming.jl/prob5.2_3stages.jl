@@ -11,14 +11,14 @@
 using SDDP, JuMP, Base.Test, Clp
 
 n = 4
-m = 3
+M = 3
 ic = [16, 5, 32, 2]
 C = [25, 80, 6.5, 160]
 T = [8760, 7000, 1500] / 8760
 D2 = [diff([0, 3919, 7329, 10315])  diff([0, 7086, 9004, 11169])]
 p2 = [0.9, 0.1]
 
-mod = SDDPModel(
+m = SDDPModel(
                   sense = :Min,
                  stages = 3,
                  solver = ClpSolver(),
@@ -28,7 +28,7 @@ mod = SDDPModel(
     @state(sp, x[i=1:n] >= 0, x0 == 0)
 
     @variables(sp, begin
-        y[1:n, 1:m] >= 0
+        y[1:n, 1:M] >= 0
         v[1:n]      >= 0
         penalty     >= 0 # to relax constraint
     end)
@@ -41,7 +41,7 @@ mod = SDDPModel(
     stageobjective!(sp, dot(ic, v) +  dot(C, y * T) + 1e6 * penalty)
 
     if t != 1 # no uncertainty in first stage
-        for j in 1:m
+        for j in 1:M
             @noise(sp, s=1:size(D2, 2), sum(y[:,j]) + penalty >= D2[j,s])
         end
         setnoiseprobability!(sp, p2)
@@ -52,7 +52,7 @@ mod = SDDPModel(
     end
 end
 
-@time status = SDDP.solve(mod,
+@time status = SDDP.solve(m,
     max_iterations = 30,
     simulation = MonteCarloSimulation(
         frequency = 10,
@@ -62,6 +62,6 @@ end
     )
 )
 
-@test isapprox(getbound(mod), 406712.49, atol=0.1)
-sim = simulate(mod, 1, [:x, :penalty])
+@test isapprox(getbound(m), 406712.49, atol=0.1)
+sim = simulate(m, 1, [:x, :penalty])
 @test isapprox(sim[1][:x][1], [2986,0,7329,854])

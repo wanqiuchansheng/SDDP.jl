@@ -46,9 +46,9 @@ m = SDDPModel(
     stageobjective!(sp, (sin(3 * stage) - 1) * sum(control))
 end
 
-@time status = SDDP.solve(m, max_iterations = 100)
-@test isapprox(SDDP.getbound(m), -4.349, atol=0.01)
-
+@time status = SDDP.solve(m, max_iterations = 500)
+@test isapprox(SDDP.getbound(m), -4.341, atol=0.01)
+@show SDDP.getbound(m)
 results = simulate(m, 5000)
 
 @test isapprox(mean(r[:objective] for r in results), -4.349, atol=0.02)

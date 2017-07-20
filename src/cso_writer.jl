@@ -1,7 +1,7 @@
 # TODO quadratic objective
 # TODO constant in objective
 using CSO
-function writecso{T}(filename::String, m::SDDPModel{DefaultValueFunction{T}}; kwargs...)
+function writecso{T}(filename::String, m::SDDPModel{DefaultValueFunction{T}}, writelp=true; kwargs...)
     model = CSO.CSOProblem{CSO.LinearSubproblemRealisation}(
         CSO.CSOSubproblem{CSO.LinearSubproblemRealisation}[],
         nstates(getsubproblem(m, 1, 1))
@@ -33,7 +33,7 @@ function writecso{T}(filename::String, m::SDDPModel{DefaultValueFunction{T}}; kw
             push!(model.subproblems, subproblem)
         end
     end
-    CSO.write(filename, model; kwargs...)
+    CSO.write(filename, model; writelp=writelp, kwargs...)
 end
 
 function construct_realisation(sp)
@@ -51,13 +51,10 @@ function construct_realisation(sp)
         c[var.col] += coef
     end
     ex = ext(sp)
-    @show JuMP.MathProgBase.numvar(sp)
     theta_idx = ex.valueoracle.theta.col
     good_cols = vcat(1:(theta_idx-1), (theta_idx+1):length(c))
-
     s_out = [colnames[s.variable.col] for s in ex.states]
     s_in = [colnames[sp.linconstr[s.constraint.idx].terms.vars[1].col] for s in ex.states]
-
     bad_rows = [s.constraint.idx for s in ex.states]
     for (i, con) in enumerate(sp.linconstr)
         for v in con.terms.vars
@@ -68,7 +65,6 @@ function construct_realisation(sp)
         end
     end
     good_rows = [i for i in 1:JuMP.MathProgBase.numconstr(sp) if !(i in bad_rows)]
-    # TODO state columns now out of wack
     CSO.LinearSubproblemRealisation(
         JuMP.MathProgBase.getconstrmatrix(internalmodel(sp))[good_rows, good_cols],
         sp.colLower[good_cols],

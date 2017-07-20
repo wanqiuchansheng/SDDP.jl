@@ -79,6 +79,6 @@ end
                         atol       = 1e-3
                             )
 )
-
+@show getbound(m)
 @test isapprox(getbound(m), 97.9, atol=1e-3)
 @test solvestatus == :bound_convergence

@@ -93,4 +93,5 @@ SDDP.solve(m,
 )
 
 @test isapprox(getbound(m), 835.0, atol=1e-3)
+@show getbound(m)
 # objective solution = 835

@@ -32,3 +32,4 @@ end
 status = solve(m, max_iterations = 3)
 
 @test getbound(m) == -2
+@show getbound(m)
