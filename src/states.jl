@@ -36,10 +36,13 @@ function padvec!{T}(x::AbstractVector{T}, n::Int)
 end
 
 function statevariable!(m::JuMP.Model, xin::JuMP.Variable, xout::JuMP.Variable)
+    v = getvalue(xout)
+    m.colVal[xin.col] = v
     push!(states(m),
             State(
+                xin,
                 xout,
-                @constraint(m, xin == getvalue(xout))
+                @constraint(m, xin == v)
             )
     )
 end

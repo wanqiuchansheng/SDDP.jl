@@ -4,7 +4,7 @@ using CSO
 function writecso{T}(filename::String, m::SDDPModel{DefaultValueFunction{T}}, writelp=true; kwargs...)
     model = CSO.CSOProblem{CSO.LinearSubproblemRealisation}(
         CSO.CSOSubproblem{CSO.LinearSubproblemRealisation}[],
-        nstates(getsubproblem(m, 1, 1))
+        [getvalue(s.incoming) for s in states(getsubproblem(m, 1, 1))]
     )
     for stage in stages(m)
         n = length(model.subproblems) - size(stage.transitionprobabilities, 1)

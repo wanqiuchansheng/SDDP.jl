@@ -41,6 +41,7 @@ immutable Cut
 end
 
 immutable State
+    incoming::JuMP.Variable
     variable::JuMP.Variable
     constraint::LinearConstraint
 end

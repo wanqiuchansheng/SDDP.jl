@@ -47,6 +47,7 @@ include("solve_asyncronous.jl")
 include("visualiser/visualise.jl")
 
 include("cso_writer.jl")
+include("cso_reader.jl")
 
 immutable UnsetSolver <: JuMP.MathProgBase.AbstractMathProgSolver end
 """
