@@ -156,6 +156,10 @@ function SDDPModel(build!::Function;
     end
 
     # New SDDPModel
+    # getel(::Type{A}, x::T, t::Int, i::Int=1) where {A, T <: A} = x
+    # getel(::Type{A}, x::Vector{T}, t::Int, i::Int=1) where {A, T <: A} = x[t]
+    # getel(::Type{A}, x::Vector{Vector{T}}, t::Int, i::Int) where {A, T <: A} = x[t][i]
+    # getel 实际就是获得 x[t][i]
     m = newSDDPModel(sense, getel(AbstractValueFunction, value_function, 1, 1), build!)
 
     for t in 1:stages
